@@ -55,3 +55,102 @@ fd--floppy disk软盘
    解压缩：
     unzip 压缩包名字
     unzip 压缩包名字 -d 解压目录
+# 进程管理
+    ps a//查看所有用户信息
+    ps au//查看更多信息
+    ps aux//查看没终端的程序
+    PID：进程序号
+## 管道
+    符号：“|” //ps aux | grep xxxx
+1. kill使用：
+    kill -l//查看所有命令
+    kill -SIGNKILL XXX//杀死某一个进程
+2. 环境变量：
+    key-value
+    key-value：key-value：key-value
+3. 任务管理器：
+    top
+# 网络
+1. 查看ip：ifconfig// eth0：当前网卡信息，
+2. 用户管理：
+    1. 创建用户：
+        sudo adduser 用户名
+    2. 切换用户：
+        su 用户名
+    3. sudo useradd -s /bin/bash -g Robin -d /home/Robin -m Robin
+    4. 添加用户组：
+        sudo groupadd 用户组名
+    5. 修改密码：passwd
+    6. 退出当前用户：exit
+    7. 删除用户:
+        sudo deluser 用户名
+        sudo userdel -r 用户名
+# ftp服务器搭建 vsftpd
+## 作用： 文件上传和下载
+1. 服务器端：
+    1. 修改配置文件
+        cd /etc/
+        gedit vsftpd.conf
+        anonymous_enable=NO//运行匿名用户登录
+        local_enable=YES//本地用户登录
+        #write_enable=YES//实名用户拥有写权限
+        #local_umask=022//设置本地掩码
+        #anon_upload_enable=YES//匿名用户可以向ftp服务器上传数据
+        #anon_mkdir_write_enable=YES//匿名用户可以在ftp服务器上创建目录     
+    2. 重启服务
+        sudo service vsftpd restart
+2. 客户端：
+    1. 实名用户登录
+        ftp+IP（server）
+        输入用户名
+        输入密码
+        1. 文件上传：
+            put 文件名
+        2. 文件下载：
+            get 文件名
+    2. 匿名用户登录
+        ftp+IP（server）
+        输入用户名：anonymous
+        输入密码：回车
+        1. 文件上传：
+            put 文件名
+        2. 文件下载：
+            get 文件名
+    3. lftp客户端访问ftp服务器
+        1. ftp客户端工具
+        2. 登录
+            1. 匿名：
+                lftp ip 
+                login
+            2. 实名：
+                lftp 用户名@ip
+                输入服务器密码
+        3. 文件传输：
+            put 上传文件
+            mput 上传多个文件
+            get 下载文件
+            mget 下载多个文件
+            mirror 下载整个目录极其子目录
+            mirror -R 上传整个目录极其子目录
+# nfs服务器
+## 作用：网络文件系统，共享文件夹
+1. 服务器：
+    1. 创建共享目录
+        mkdir dir
+    2. 修改配置文件
+        /etc/exports
+    3. 重启服务器：
+        sudo service nfs-kernel-server restart
+2. 客户端：
+    1. 挂在服务器共享目录
+        mount ip：共享目录名 要挂载的目录
+# ssh服务器
+1. 服务器：
+    1. 安装：
+    2. 登录：
+    ssh 用户名@ip 
+    3. 退出： logout
+2. 客户端：
+# scp命令
+## 作用：超级拷贝，不同主机之间拷贝
+scp -r 用户名@ip：待拷贝目录 拷贝到的目录
