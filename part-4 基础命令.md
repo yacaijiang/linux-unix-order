@@ -79,4 +79,49 @@ ldd main.exe 查找所有依赖的库
     目标:依赖条件
         命令
 ```
-
+3. 函数实用：
+    1. 方法一
+```
+    app:main.o sub.o mul.o
+        gcc main.0 sub.o mul.o -o app
+    %.o:%.c
+        gcc -c %< -o %@
+```
+2. 方法二
+```
+obj=main.o sub.o mul.o
+target = app
+//makefile自己维护的变量（大写）
+CC = cc //gcc
+CPPFLAG = -I//预处理器
+CFLAGS = -Wall//编译时使用的参数-g -c
+LDFLAGS = -L //链接库使用选项
+&(target):$(obj)
+    gcc $(obj) -o $(target)
+    %.o:%.c
+        gcc -c %< -o %@
+```
+%<: 规则中第一个依赖</br>
+%@：规则中的目标</br>
+%^：规则中的所有依赖，只能在规则的命令中使用</br>
+3. 方法三：
+```
+src = $(wildcard ./*.c)
+obj = $(patsubst ./%.o, ./%.c, $(src))
+target = app
+//makefile自己维护的变量（大写）
+CC = cc //gcc
+CPPFLAG = -I//预处理器
+CFLAGS = -Wall//编译时使用的参数-g -c
+LDFLAGS = -L //链接库使用选项
+&(target):$(obj)
+    gcc $(obj) -o $(target)
+    %.o:%.c
+        gcc -c %< -o %@
+.PHONY:clean
+clean: //make clean
+    -mkdir /test//加"-"可以忽略该命令
+    rm $(obj) $(target) -f
+hello: //make hello
+    echo "hello !"
+```
