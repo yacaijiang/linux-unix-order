@@ -93,3 +93,129 @@ if(i<5){//子进程执行
         2. waitpid函数:
             pid_t waitpid(pid_t pid,int *status,int optition);</br>
     wait和waitpid每次只能kill一个子进程
+#  IPC（InterProcess Communication）：进程间通信 </br>
+   1. 常用进程间通信方式：
+    1. 管道：最简单
+    2. 信号：开销最小
+    3. 共享映射区：无血缘关系
+    4. 本地套接字：最稳定
+# 管道：
+1. 特点：</br>
+    本质是一个伪文件</br>
+    由两个文件描述符引用，一个表示读，一个表示写</br>
+    规定数据从管道的写流入管道，从读流出
+2. 原理：</br>
+    内核使用环形队列，借助内核缓冲区（4k）实现。
+3. 局限性：</br>
+    数据自己读不能自己写</br>
+    数据一旦被读走，便不在管道中存在，不可反复读取</br>
+    由于采用半双工通信，数据单方向流动</br>
+    只能在由公共祖先的进程中使用管道</br>
+4. 函数：</br>
+    #include<unistd.h>
+    int pipe(int pipefd[2]);
+    int pipe2(int pipefd[2],int flag);
+# 共享内存：
+1. mmap函数：</br>
+    ```
+       #include <sys/mman.h>
+       void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset);
+       int munmap(void *addr, size_t length);//释放mmap映射区
+    ```
+    1. 参数：</br>
+        addr//建立映射区首地址，Linux内核指定，使用时传NULL</br>
+        length:想要创建映射区大小</br>
+        prot：映射区权限PROT_READ PROT_WRITE PROT_READ|PROT_WRITE</br>
+        flags:标志位参数（常用于设定更新物理区域，设置共享、创建匿名映射区）</br>
+            MAP_SHARED:将映射区所做操作反映到物理设备（磁盘）</br>
+            MAP_PRIVATE:映射区所做的修改不会反映到物理设备</br>
+        fd： 用来建立映射区的文件描述符</br>
+        offset：映射文件偏移（4k整数倍）</br>
+    2. 返回值：</br>
+        成功：返回映射区首地址</br>
+        失败：MAP_FAILED宏</br>
+    3. ![mmap注意事项](https://user-images.githubusercontent.com/37798962/90210830-b169a800-de21-11ea-8921-53bf71147b7e.jpg)
+2. 借助共享内存放磁盘文件：</br>
+3. 父子进程、血缘关系进程 通信</br>
+    MAP_SHARED:共享映射区</br>
+    MAP_PRIVATE:独占映射区</br>
+4. 匿名映射区</br>
+    使用MAP_ANONYMOUS(MAP_ANON):</br>
+    int *p=mmap(NULL,4,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);//4即位置表大小，按实际需要填写
+# 信号
+1. 概念：简单、不携带大量信息、满足某个特设条件
+# 守护进程
+1. 概念： 后台服务进程，通常独立于控制终端并周期性执行某种任务或者等待处理某些发生的事件，一般采用d结尾的名字，如：预读入缓输出机制的：ftp服务器 nfs服务器
+2. 创建守护进程模型：
+    1. 创建子进程，父进程退出
+    2. 子进程中创建新的会话
+        sersid（）函数
+    3. 改变当前目录为根目录
+        chdir（）函数
+    4. 重设文件权限掩码
+        umask（）函数
+    5. 关闭文件描述符
+    ```
+    close(STDIN_FILENO);
+    open("/dev/null",O_RDWR);
+    dup2(0,STDIN_FILENO);
+    dup2(0,STDIN_FILENO);
+    ```
+    6. 开始执行守护进程核心工作
+    7. 守护进程退出处理程序模型
+# 线程：
+1. 概念：</br>
+    线程：有PCB，没有独立的地址空间（最小的执行单位）</br>
+    进程：独立地址空间，有PCB（最小分配资源的单位）</br>
+    线程可以看作寄存器和栈的集合</br>
+    线程共享资源：</br>
+    1. 文件描述符表
+    2. 每种信号的处理方式
+    3. 当前工作目录
+    4. 用户ID和组ID
+    5. 内存地址（.text/.data/.bss/heap/共享库）
+    非共享资源：</br>
+    1. 线程id
+    2. 处理器现场和栈指针
+    3. 独立的栈空间（用户空间栈）
+    4. errno变量
+    5. 信号屏蔽字
+    6. 调度优先级
+    优点：</br>
+    1. 提高程序并发性
+    2. 开销小
+    3. 数据通信、共享数据方便
+    缺点：</br>
+    1. 库函数不稳定
+    2. 调试编写困难，gdb不支持
+    3. 对信号支持不好
+2. 控制原语：
+    1. pthread_self函数
+    ```
+       #include <pthread.h>
+
+       pthread_t pthread_self(void);
+
+       Compile and link with -pthread.
+    ```
+    2. pthread_create函数
+    ```
+        #include <pthread.h>
+
+       int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                          void *(*start_routine) (void *), void *arg);
+
+       Compile and link with -pthread.
+    ```
+    3. pthread_exit函数
+    ```
+       #include <pthread.h>
+
+       void pthread_exit(void *retval);
+
+       Compile and link with -pthread.
+    ```
+3. 属性：
+    
+4. 注意事项：
