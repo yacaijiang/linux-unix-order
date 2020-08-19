@@ -300,5 +300,6 @@ getpid()|pthread_self()
     5. sem_timewait
     6. sem_post//信号量++
 
+# 进程同步
 
 # 哲学家吃饭
