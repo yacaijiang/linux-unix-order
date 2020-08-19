@@ -216,6 +216,89 @@ if(i<5){//子进程执行
 
        Compile and link with -pthread.
     ```
+    4. pthread_join函数
+    ```
+    #include <pthread.h>
+
+       int pthread_join(pthread_t thread, void **retval);
+
+       Compile and link with -pthread.
+    ```
+    5. pthread_detach函数
+    ```
+    #include <pthread.h>
+
+       int pthread_detach(pthread_t thread);
+
+       Compile and link with -pthrea
+    ```
+    6. pthred_cancel函数:必须在线程执行过程中执行某些指定函数（系统调用）
+    ```
+    #include <pthread.h>
+
+       int pthread_cancel(pthread_t thread);
+
+       Compile and link with -pthread.
+    ```
+    7. pthread_equal函数
+    ```
+    #include <pthread.h>
+
+       int pthread_equal(pthread_t t1, pthread_t t2);
+
+       Compile and link with -pthread.
+
+    ```
+进程|线程
+fork|pthread_create
+exit(10)|pthread_exit(void *)
+wait(int *)|pthread_join(,void **)
+kill()|pthread_cancel()
+getpid()|pthread_self()
+ |pthread_detach()
 3. 属性：
     
 4. 注意事项：
+    1. 主线程退出其他线程不退出，主线程应该调用pthread_exit
+    2. 避免僵尸进程
+    3. malloc和mmap申请的内存可以被其他线程释放
+    4. 应该避免在多线程模型中调用fork，除非马上exec，子进程中只有调用fork的线程存在，其他线程在子进程中均pthread_exit
+    5. 信号的复杂语义很难和多线程共存，避免引入多线程机制
+# 线程同步
+1. 同步概念</br>
+    线程同步：协调步调，按预定的先后次序运行</br>
+    同步的条件：</br>
+    1. 共享数据
+    2. 竞争
+    3. 多对象</br>
+用户用到的锁都是建议锁（不具备强制性）    
+2. 互斥锁 </br>
+    锁的“粒度”越小越好</br>
+    1. 死锁：</br>
+    线程对同一个互斥量A加锁两次；</br>
+    线程1拥有A锁，请求获得B锁；线程2拥有B锁，请求获得A锁；（使用trylock，返回失败值，然后放弃自己的资源）
+3. 读写锁</br>
+    写独占，读共享,写锁优先级高</br>
+    三种状态：</br>
+    读模式下加锁</br>
+    写模式下加锁</br>
+    不加锁</br>
+
+4. 条件变量
+    可以造成线程阻塞，通常与互斥锁配合使用。
+    1. pthread_cond_init
+    2. pthread_cond_wait
+    3. pthread_cond_timewait
+    4. pthread_cond_signal
+    5. pthread_cond_broadcast</br>
+    生产者消费者模型
+5. 信号量（进化版互斥锁）
+    1. sem_init
+    2. sem_destroy
+    3. sem_wait//信号量--
+    4. sem_trywait
+    5. sem_timewait
+    6. sem_post//信号量++
+
+
+# 哲学家吃饭
